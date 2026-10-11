@@ -3,8 +3,8 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ChevronDown, MessageCircle, Car, ArrowLeft } from "lucide-react";
-import CarModel3D from "@/components/CarModel3D";
+import { ChevronDown, MessageCircle, Car } from "lucide-react";
+import CarGallery from "@/components/CarGallery";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,7 +12,6 @@ export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subRef = useRef<HTMLParagraphElement>(null);
-  const carsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -27,18 +26,6 @@ export default function Home() {
         opacity: 0,
         duration: 1.2,
         delay: 0.4,
-        ease: "power3.out",
-      });
-
-      gsap.from(".car-card", {
-        scrollTrigger: {
-          trigger: carsRef.current,
-          start: "top 80%",
-        },
-        y: 100,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.2,
         ease: "power3.out",
       });
     }, heroRef);
@@ -118,65 +105,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* بخش کاوش خودروها */}
-      <section ref={carsRef} className="relative z-10 px-8 py-32">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-16 text-center">
-            <span className="mb-4 inline-block text-sm tracking-widest text-[#C9A227]">
-              — گالری خودروها —
-            </span>
-            <h2 className="text-4xl font-black md:text-5xl">
-              خودروی <span className="text-[#C9A227]">منتخب</span> خود را کشف کنید
-            </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-[#B8BCC2]">
-              هر خودرو را می‌توانید در فضای سه‌بعدی بچرخانید، داخل کابین قدم بزنید و از نزدیک لمس کنید.
-            </p>
-          </div>
-
-          <div className="car-card group relative overflow-hidden rounded-3xl border border-[#1F6F5C]/30 bg-gradient-to-br from-[#0f1a16] to-[#0a0e0c] p-8 transition hover:border-[#C9A227]/60 hover:shadow-[0_0_60px_rgba(201,162,39,0.2)]">
-            <div className="grid gap-8 md:grid-cols-2 md:items-center">
-              <div>
-                <span className="mb-3 inline-block rounded-full border border-[#C9A227]/30 bg-[#C9A227]/5 px-3 py-1 text-xs text-[#C9A227]">
-                  جدید ۲۰۲۵
-                </span>
-                <h3 className="mb-2 text-3xl font-black text-[#F8F8F6]">
-                  مرسدس بنز <span className="text-[#C9A227]">C200L</span>
-                </h3>
-                <p className="mb-6 text-[#B8BCC2]">
-                  سدان لوکس با طراحی مدرن، کابین پیشرفته و فناوری‌های روز دنیا.
-                </p>
-
-                <div className="mb-6 grid grid-cols-3 gap-4 text-center">
-                  <div className="rounded-xl border border-[#1F6F5C]/30 bg-[#0a0e0c]/60 p-3">
-                    <div className="text-xs text-[#B8BCC2]">موتور</div>
-                    <div className="mt-1 font-bold text-[#C9A227]">2.0L</div>
-                  </div>
-                  <div className="rounded-xl border border-[#1F6F5C]/30 bg-[#0a0e0c]/60 p-3">
-                    <div className="text-xs text-[#B8BCC2]">قدرت</div>
-                    <div className="mt-1 font-bold text-[#C9A227]">204hp</div>
-                  </div>
-                  <div className="rounded-xl border border-[#1F6F5C]/30 bg-[#0a0e0c]/60 p-3">
-                    <div className="text-xs text-[#B8BCC2]">رنگ</div>
-                    <div className="mt-1 font-bold text-[#C9A227]">سفید</div>
-                  </div>
-                </div>
-
-                <button className="flex items-center gap-2 rounded-full bg-gradient-to-l from-[#1F6F5C] to-[#C9A227] px-6 py-3 font-bold text-[#0a0e0c] transition hover:scale-105">
-                  مشاهده سه‌بعدی
-                  <ArrowLeft className="h-4 w-4" />
-                </button>
-              </div>
-
-              <div className="relative h-72 overflow-hidden rounded-2xl bg-gradient-to-br from-[#1F6F5C]/20 to-[#C9A227]/10 md:h-96">
-                <CarModel3D />
-                <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-[#0a0e0c]/70 px-3 py-1 text-xs text-[#B8BCC2] backdrop-blur">
-                  🖱️ با موس بچرخانید
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* گالری چند ماشین */}
+      <CarGallery />
 
       {/* فوتر */}
       <footer className="relative z-10 border-t border-[#1F6F5C]/20 px-8 py-10 text-center text-sm text-[#B8BCC2]">

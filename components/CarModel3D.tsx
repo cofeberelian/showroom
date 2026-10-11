@@ -12,7 +12,9 @@ import {
 } from "@react-three/drei";
 import { Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { Eye, Undo2 } from "lucide-react";
+import { Eye, Undo2, Box, Image as ImageIcon } from "lucide-react";
+import { Car } from "@/data/cars";
+import CarImage from "./CarImage";
 
 const CAR_COLORS = [
   { name: "سفید", hex: "#F8F8F6" },
@@ -42,8 +44,14 @@ function Loader() {
   );
 }
 
-function CarModel({ color }: { color: string }) {
-  const { scene } = useGLTF("/models/c200l.glb");
+function CarModel({
+  color,
+  modelPath,
+}: {
+  color: string;
+  modelPath: string;
+}) {
+  const { scene } = useGLTF(modelPath);
 
   useEffect(() => {
     scene.traverse((child) => {
@@ -79,16 +87,13 @@ function CarModel({ color }: { color: string }) {
   );
 }
 
-// 🎥 نگاه داخل: دوربین ثابت، اما می‌تونه با موس بچرخه
+// 🎥 نگاه داخل: دوربین ثابت، اما با موس می‌چرخه
 function InsideCamera() {
   const { camera, gl } = useThree();
   const mouse = useRef({ x: 0, y: 0 });
   const rotation = useRef({ yaw: 0, pitch: 0 });
 
   useEffect(() => {
-    // دوربین داخل: بالای صندلی، نگاه به جلو
-    // ماشین: x از -2.44 تا 2.18, z از -2.44 تا 2.18
-    // جلو ماشین سمت z مثبته
     camera.position.set(-0.13, 0.85, -0.3);
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -103,21 +108,18 @@ function InsideCamera() {
     };
   }, [camera, gl]);
 
-  // هر فریم: نگاه رو به سمت موس نرم بچرخون
   useFrame(() => {
-    // محدوده چرخش: چپ/راست ±80 درجه، بالا/پایین ±40 درجه
     const targetYaw = mouse.current.x * Math.PI * 0.45;
     const targetPitch = mouse.current.y * Math.PI * 0.25;
 
-    // نرم‌سازی حرکت
     rotation.current.yaw += (targetYaw - rotation.current.yaw) * 0.08;
     rotation.current.pitch += (targetPitch - rotation.current.pitch) * 0.08;
 
-    // نگاه به جلو (z+)
     const lookDistance = 3;
     const dirX = Math.sin(rotation.current.yaw);
     const dirY = Math.sin(rotation.current.pitch);
-    const dirZ = Math.cos(rotation.current.yaw) * Math.cos(rotation.current.pitch);
+    const dirZ =
+      Math.cos(rotation.current.yaw) * Math.cos(rotation.current.pitch);
 
     camera.lookAt(
       camera.position.x + dirX * lookDistance,
@@ -161,92 +163,147 @@ function CameraController({ isInside }: { isInside: boolean }) {
 
 useGLTF.preload("/models/c200l.glb");
 
-export default function CarModel3D() {
-  const [selectedColor, setSelectedColor] = useState("#F8F8F6");
+export default function CarModel3D({ car }: { car: Car }) {
+  const [selectedColor, setSelectedColor] = useState(car.colorHex);
   const [isInside, setIsInside] = useState(false);
+  const [viewMode, setViewMode] = useState<"3d" | "image">("3d");
+
+  // وقتی ماشین عوض می‌شه، تنظیمات رو ریست کن
+  useEffect(() => {
+    setSelectedColor(car.colorHex);
+    setIsInside(false);
+    setViewMode("3d");
+  }, [car]);
 
   return (
     <div className="relative h-full w-full">
-      <Canvas
-        shadows
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true }}
-        style={{ background: "transparent" }}
-      >
-        <PerspectiveCamera
-          makeDefault
-          position={[6, 3, 6]}
-          fov={isInside ? 80 : 45}
-        />
+      {/* نمایش بر اساس حالت */}
+      {viewMode === "3d" ? (
+        <Canvas
+          shadows
+          dpr={[1, 2]}
+          gl={{ antialias: true, alpha: true }}
+          style={{ background: "transparent" }}
+        >
+          <PerspectiveCamera
+            makeDefault
+            position={[6, 3, 6]}
+            fov={isInside ? 80 : 45}
+          />
 
-        <ambientLight intensity={isInside ? 2 : 0.6} />
-        <spotLight
-          position={[10, 10, 10]}
-          angle={0.3}
-          penumbra={1}
-          intensity={2.5}
-          castShadow
-        />
-        <spotLight
-          position={[-10, 10, -10]}
-          angle={0.3}
-          penumbra={1}
-          intensity={1.5}
-          color="#C9A227"
-        />
-
-        {isInside && (
-          <>
-            <pointLight position={[-0.13, 1.5, -0.3]} intensity={3} color="#ffffff" />
-            <pointLight position={[-0.13, 1, 1]} intensity={2} color="#ffffff" />
-            <pointLight position={[-0.13, 1, -1.5]} intensity={2} color="#ffffff" />
-          </>
-        )}
-
-        <Environment preset="city" />
-
-        <Suspense fallback={<Loader />}>
-          <CarModel color={selectedColor} />
-        </Suspense>
-
-        {!isInside && (
-          <ContactShadows
-            position={[0, -0.55, 0]}
-            opacity={0.7}
-            scale={15}
-            blur={2.5}
-            far={5}
+          <ambientLight intensity={isInside ? 2 : 0.6} />
+          <spotLight
+            position={[10, 10, 10]}
+            angle={0.3}
+            penumbra={1}
+            intensity={2.5}
+            castShadow
+          />
+          <spotLight
+            position={[-10, 10, -10]}
+            angle={0.3}
+            penumbra={1}
+            intensity={1.5}
             color="#C9A227"
           />
-        )}
 
-        {isInside ? <InsideCamera /> : <CameraController isInside={false} />}
-      </Canvas>
+          {isInside && (
+            <>
+              <pointLight
+                position={[-0.13, 1.5, -0.3]}
+                intensity={3}
+                color="#ffffff"
+              />
+              <pointLight
+                position={[-0.13, 1, 1]}
+                intensity={2}
+                color="#ffffff"
+              />
+              <pointLight
+                position={[-0.13, 1, -1.5]}
+                intensity={2}
+                color="#ffffff"
+              />
+            </>
+          )}
 
-      {/* دکمه داخل/بیرون */}
-      <button
-        onClick={() => setIsInside(!isInside)}
-        className={`pointer-events-auto absolute top-3 right-3 z-20 flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold backdrop-blur-md transition-all ${
-          isInside
-            ? "border-[#C9A227] bg-[#C9A227] text-[#0a0e0c]"
-            : "border-[#C9A227]/40 bg-[#0a0e0c]/80 text-[#C9A227] hover:bg-[#C9A227] hover:text-[#0a0e0c]"
-        }`}
-      >
-        {isInside ? (
-          <>
-            <Undo2 className="h-4 w-4" />
-            بازگشت به بیرون
-          </>
-        ) : (
-          <>
-            <Eye className="h-4 w-4" />
-            مشاهده داخل کابین
-          </>
-        )}
-      </button>
+          <Environment preset="city" />
 
-      {/* رنگ‌ها */}
+          <Suspense fallback={<Loader />}>
+            <CarModel color={selectedColor} modelPath={car.model3d} />
+          </Suspense>
+
+          {!isInside && (
+            <ContactShadows
+              position={[0, -0.55, 0]}
+              opacity={0.7}
+              scale={15}
+              blur={2.5}
+              far={5}
+              color="#C9A227"
+            />
+          )}
+
+          {isInside ? <InsideCamera /> : <CameraController isInside={false} />}
+        </Canvas>
+      ) : (
+        <CarImage car={car} />
+      )}
+
+      {/* 🎯 دکمه‌ی toggle 3D/عکس (فقط وقتی داخل کابین نیستیم) */}
       {!isInside && (
+        <div className="pointer-events-auto absolute top-3 left-3 z-20 flex gap-1 rounded-full border border-[#C9A227]/40 bg-[#0a0e0c]/80 p-1 backdrop-blur-md">
+          <button
+            onClick={() => setViewMode("3d")}
+            className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold transition ${
+              viewMode === "3d"
+                ? "bg-[#C9A227] text-[#0a0e0c]"
+                : "text-[#B8BCC2] hover:text-[#C9A227]"
+            }`}
+          >
+            <Box className="h-3 w-3" />
+            3D
+          </button>
+          <button
+            onClick={() => setViewMode("image")}
+            className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold transition ${
+              viewMode === "image"
+                ? "bg-[#C9A227] text-[#0a0e0c]"
+                : "text-[#B8BCC2] hover:text-[#C9A227]"
+            }`}
+          >
+            <ImageIcon className="h-3 w-3" />
+            عکس
+          </button>
+        </div>
+      )}
+
+      {/* دکمه داخل/بیرون (فقط در حالت 3D) */}
+      {viewMode === "3d" && (
+        <button
+          onClick={() => setIsInside(!isInside)}
+          className={`pointer-events-auto absolute top-3 right-3 z-20 flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold backdrop-blur-md transition-all ${
+            isInside
+              ? "border-[#C9A227] bg-[#C9A227] text-[#0a0e0c]"
+              : "border-[#C9A227]/40 bg-[#0a0e0c]/80 text-[#C9A227] hover:bg-[#C9A227] hover:text-[#0a0e0c]"
+          }`}
+        >
+          {isInside ? (
+            <>
+              <Undo2 className="h-4 w-4" />
+              بازگشت به بیرون
+            </>
+          ) : (
+            <>
+              <Eye className="h-4 w-4" />
+              مشاهده داخل کابین
+            </>
+          )}
+        </button>
+      )}
+
+      {/* رنگ‌ها (فقط در حالت 3D و نمای بیرون) */}
+      {viewMode === "3d" && !isInside && (
         <div className="pointer-events-auto absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-[#1F6F5C]/30 bg-[#0a0e0c]/80 px-3 py-2 backdrop-blur-md">
           <span className="mr-1 text-xs text-[#B8BCC2]">رنگ:</span>
           {CAR_COLORS.map((c) => (
@@ -267,7 +324,11 @@ export default function CarModel3D() {
 
       {/* راهنما */}
       <div className="pointer-events-none absolute bottom-3 left-3 z-10 rounded-full bg-[#0a0e0c]/70 px-3 py-1 text-xs text-[#B8BCC2] backdrop-blur">
-        {isInside ? "🎮 با موس نگاه کن" : "🖱️ بچرخانید"}
+        {viewMode === "image"
+          ? "🖼️ عکس خودرو"
+          : isInside
+          ? "🎮 با موس نگاه کن"
+          : "🖱️ بچرخانید"}
       </div>
     </div>
   );
