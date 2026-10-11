@@ -14,7 +14,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   background: #0a0e0c;
@@ -23,8 +24,12 @@ html, body {
   overflow-x: hidden;
 }
 
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #0a0e0c; }
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0e0c;
+}
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, var(--brand-green2), var(--brand-gold));
   border-radius: 10px;
@@ -35,6 +40,121 @@ html, body {
   color: #0a0e0c;
 }
 
-.text-gold { color: var(--brand-gold); }
-.bg-brand-green { background: var(--brand-green); }
-.glow-gold { box-shadow: 0 0 30px rgba(201, 162, 39, 0.4); }
+.text-gold {
+  color: var(--brand-gold);
+}
+.bg-brand-green {
+  background: var(--brand-green);
+}
+.glow-gold {
+  box-shadow: 0 0 30px rgba(201, 162, 39, 0.4);
+}
+
+/* ============ موشن گرافی ============ */
+
+/* رد لاستیک */
+@keyframes tireTrack {
+  0% {
+    stroke-dashoffset: 1500;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+.tire-track {
+  stroke-dasharray: 1500;
+  animation: tireTrack 5s ease-in-out infinite;
+}
+
+/* ذرات نور */
+@keyframes floatParticle {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate(30px, -50px) scale(1.5);
+    opacity: 0.9;
+  }
+  90% {
+    opacity: 1;
+  }
+}
+
+.particle {
+  animation: floatParticle linear infinite;
+  opacity: 0;
+}
+
+/* درخشش طلایی روی متن */
+@keyframes goldShine {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.gold-shine {
+  background: linear-gradient(
+    90deg,
+    #c9a227 0%,
+    #e8c766 25%,
+    #ffffff 50%,
+    #e8c766 75%,
+    #c9a227 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: goldShine 4s linear infinite;
+}
+
+/* خط نور */
+@keyframes lightSweep {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(200%);
+    opacity: 0;
+  }
+}
+
+.light-sweep {
+  animation: lightSweep 3s ease-in-out infinite;
+}
+
+/* پالس طلایی */
+@keyframes pulseGold {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(201, 162, 39, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 60px rgba(201, 162, 39, 0.7);
+  }
+}
+
+.pulse-gold {
+  animation: pulseGold 2s ease-in-out infinite;
+}
